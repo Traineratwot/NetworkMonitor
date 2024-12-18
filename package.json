@@ -2,6 +2,7 @@
   "name": "net-check",
   "module": "index.ts",
   "type": "module",
+  "version": "1.0.0",
   "scripts": {
     "build": "bun ./bin/build.ts"
   },

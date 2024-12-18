@@ -45,7 +45,6 @@ Version: 1.0.0
 Section: utils
 Priority: optional
 Architecture: amd64
-Depends: bun
 Maintainer: Traineratwot <traineratwot@yandex.ru>
 Description: A network monitoring tool that checks internet connectivity.
 `.trim() + '\n'; // Добавляем новую строку в конце
