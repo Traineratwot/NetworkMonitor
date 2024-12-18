@@ -3,18 +3,25 @@ import ping from 'ping';
 import dns from 'dns';
 import notifier from 'node-notifier';
 import {parseCronExpression} from 'cron-schedule';
+import {exec} from 'child_process'; // Импортируем exec для выполнения команд
 
 // Значения по умолчанию
 const DEFAULT_HOSTS = '8.8.8.8,1.1.1.1,example.com';
 const DEFAULT_SCHEDULE = '*/5 * * * * *';
 
-// Флаг для тихого режима
+// Флаг для тихого режима и отключения уведомлений
 let isQuietMode = false;
+let disableNotifications = false;
 
 // Хранение состояния хостов
 const hostStatus: { [key: string]: { ping: boolean; dns: boolean } } = {};
 let lastInternetStatus: 'up' | 'down' | 'dnsIssue' = 'up';
 let lastErrorHost: string | null = null;
+
+// Новые аргументы для команд
+let commandOnUp: string | null = null;
+let commandOnDown: string | null = null;
+let commandOnDnsIssue: string | null = null;
 
 // Функция для проверки соединения
 async function checkConnection(hosts: string[], timeout: number): Promise<void> {
@@ -71,16 +78,19 @@ async function checkConnection(hosts: string[], timeout: number): Promise<void> 
         if (lastInternetStatus !== 'down') {
             notifyUser(`❌ Internet is down! All hosts are unreachable.`);
             lastInternetStatus = 'down';
+            executeCommand(commandOnDown); // Выполняем команду при статусе down
         }
     } else if (lastErrorHost) {
         if (lastInternetStatus !== 'dnsIssue') {
             notifyUser(`🔍 Error checking host ${lastErrorHost}.`);
             lastInternetStatus = 'dnsIssue';
+            executeCommand(commandOnDnsIssue); // Выполняем команду при статусе dnsIssue
         }
     } else {
         if (lastInternetStatus !== 'up') {
             notifyUser(`✅ Internet is working! All hosts are reachable.`);
             lastInternetStatus = 'up';
+            executeCommand(commandOnUp); // Выполняем команду при статусе up
         }
         if (!isQuietMode) {
             console.log(`✅ Internet is working! All hosts are reachable.`);
@@ -90,20 +100,45 @@ async function checkConnection(hosts: string[], timeout: number): Promise<void> 
 
 // Функция для отправки уведомлений
 function notifyUser(message: string): void {
-    notifier.notify({
-        title: 'Network Monitor',
-        message: message,
-        sound: true, // Включить звук уведомления
-    });
+    if (!disableNotifications) { // Проверяем, отключены ли уведомления
+        notifier.notify({
+            title: 'Network Monitor',
+            message: message,
+            sound: true, // Включить звук уведомления
+        });
+    }
+}
+
+// Функция для выполнения команд
+function executeCommand(command: string | null): void {
+    if (command) {
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Error executing command: ${error.message}`);
+                return;
+            }
+            if (stderr) {
+                console.error(`Command stderr: ${stderr}`);
+                return;
+            }
+            if (!isQuietMode) {
+                console.log(`Command output: ${stdout}`);
+            }
+        });
+    }
 }
 
 // Функция для вывода справки
 function printHelp(): void {
-    console.log('Usage: bun monitor.ts [options]');
+    console.log('Usage: NetworkMonitor [options]');
     console.log('Options:');
-    console.log('  --hosts, -h <host1,host2,...>   Comma-separated list of hosts to check (default: 8.8.8.8,1.1.1.1,example.com)');
+    console.log('  --hosts, -h <host1,host2,...>    Comma-separated list of hosts to check (default: 8.8.8.8,1.1.1.1,example.com)');
     console.log('  --schedule, -s <cron_schedule>   Cron schedule for checks (default: */5 * * * *)');
     console.log('  --quiet, -q                      Run in quiet mode (no console output)');
+    console.log('  --disable-notifications          Disable notifications');
+    console.log('  --on-up <command>                Command to execute when status is up');
+    console.log('  --on-down <command>              Command to execute when status is down');
+    console.log('  --on-dns-issue <command>         Command to execute when there is a DNS issue');
     console.log('  --help, -h                       Show this help message');
 }
 
@@ -123,6 +158,14 @@ for (let i = 0; i < args.length; i++) {
         scheduleArg = args[++i] || DEFAULT_SCHEDULE; // Получаем следующий аргумент
     } else if (args[i] === '--quiet' || args[i] === '-q') {
         isQuietMode = true; // Включаем тихий режим
+    } else if (args[i] === '--disable-notifications') {
+        disableNotifications = true; // Отключаем уведомления
+    } else if (args[i] === '--on-up') {
+        commandOnUp = args[++i] || null; // Получаем команду для статуса up
+    } else if (args[i] === '--on-down') {
+        commandOnDown = args[++i] || null; // Получаем команду для статуса down
+    } else if (args[i] === '--on-dns-issue') {
+        commandOnDnsIssue = args[++i] || null; // Получаем команду для статуса dnsIssue
     }
 }
 
@@ -139,3 +182,4 @@ cron.schedule(scheduleArg, () => {
 // Запуск проверки при старте скрипта
 await checkConnection(hosts, 10000); // Начальная проверка с таймаутом 10 секунд
 console.log('next run', parseCronExpression(scheduleArg).getNextDate());
+notifyUser("🌏 Starting Network Monitor");
