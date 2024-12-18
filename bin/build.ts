@@ -3,14 +3,16 @@ import fs from "fs";
 import path from "path";
 
 const projectRoot = process.cwd();
-fs.rmdirSync(path.join(projectRoot, "dist"), { recursive: true });
+fs.rmdirSync(path.join(projectRoot, "dist"), {recursive: true});
 // Компиляция для разных платформ
-await $`bun build --compile --target=bun-windows-x64 --outfile './dist/win/network_monitor' './src/index.ts'`
-await $`bun build --compile --target=bun-linux-x64 --outfile './dist/linux/network_monitor' './src/index.ts'`
-await $`bun build --compile --target=bun-darwin-arm64 --outfile './dist/mac/network_monitor_arm' './src/index.ts'`
-await $`bun build --compile --target=bun-darwin-x64 --outfile './dist/mac/network_monitor_x86' './src/index.ts'`
+await $`bun build --compile --target=bun-windows-x64 --outfile './dist/win/network_monitor_x86' './src/index.ts'`
+await $`bun build --compile --target=bun-linux-x64 --outfile './dist/linux/network_monitor_x86' './src/index.ts'`
+await $`bun build --compile --target=bun-linux-arm64 --outfile './dist/linux/network_monitor_arm64' './src/index.ts'`
+await $`bun build --compile --target=bun-darwin-arm64 --outfile './dist/mac/network_monitor_darwin_arm64' './src/index.ts'`
+await $`bun build --compile --target=bun-darwin-x64 --outfile './dist/mac/network_monitor_darwin_x86' './src/index.ts'`
+
 // Создание структуры для .deb пакета
-{
+async function build_deb(arch: string = 'x86') {
     const debDir = path.join(projectRoot, 'dist', 'deb');
     const binDir = path.join(debDir, 'usr', 'local', 'bin');
     const serviceDir = path.join(debDir, 'etc', 'systemd', 'system');
@@ -20,7 +22,7 @@ await $`bun build --compile --target=bun-darwin-x64 --outfile './dist/mac/networ
     fs.mkdirSync(serviceDir, {recursive: true});
 
     // Копирование бинарного файла в пакет
-    fs.copyFileSync(path.join(projectRoot, 'dist', 'linux', 'network_monitor'), path.join(binDir, 'network_monitor'));
+    fs.copyFileSync(path.join(projectRoot, 'dist', 'linux', `network_monitor_${arch}`), path.join(binDir, 'network_monitor'));
 
     // Создание файла службы systemd
     const serviceFile = `
@@ -53,8 +55,11 @@ Description: A network monitoring tool that checks internet connectivity.
     fs.writeFileSync(path.join(debDir, 'DEBIAN', 'control'), controlFile);
 
     // Создание .deb пакета
-    await $`dpkg-deb --build ${debDir} ${path.join(projectRoot, 'dist', 'linux', 'network_monitor.deb')}`;
+    await $`dpkg-deb --build ${debDir} ${path.join(projectRoot, 'dist', 'linux', `network_monitor_${arch}.deb`)}`;
 }
+
+await build_deb('x86')
+await build_deb('arm64')
 
 // Создание установщика для Windows
 {

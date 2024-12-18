@@ -8,13 +8,13 @@ InstallDir "$PROGRAMFILES64\Network Monitor"
 
 Section "MainSection" SEC01
     SetOutPath "$INSTDIR"
-    File "..\dist\win\network_monitor.exe"
+    File "..\dist\win\network_monitor_x86.exe"
     
     # Создание службы
-    ExecWait '"$INSTDIR\network_monitor.exe" install'
+    ExecWait '"$INSTDIR\network_monitor_x86.exe" install'
     
     # Установка службы
-    nsExec::ExecToStack 'sc create "NetworkMonitor" binPath= "$INSTDIR\network_monitor.exe" start= auto'
+    nsExec::ExecToStack 'sc create "NetworkMonitor" binPath= "$INSTDIR\network_monitor_x86.exe" start= auto'
     nsExec::ExecToStack 'sc start "NetworkMonitor"'
 SectionEnd
 

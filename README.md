@@ -14,10 +14,22 @@ Network Monitor is a simple yet powerful tool that checks the availability of sp
 
 ## Installation
 
-To use Network Monitor, you need to have Node.js and Bun installed. You can install the required dependencies using npm:
+- linux
+  1) download `network_monitor.deb` form release
+  2) run `sudo apt install ./network_monitor.deb`
+  3) run `sudo systemctl start network_monitor.service`
+  4) run `sudo systemctl enable network_monitor.service`
+- windows
+  1) download `network_monitor_installer.exe` form release
+  2) install
+- macos
+  - ¯\_(ツ)_/¯
+
+## development
+To use Network Monitor, you need to have and Bun installed. You can install the required dependencies using bun:
 
 ```bash
-npm install node-cron ping dns node-notifier cron-schedule
+bun install node-cron ping dns node-notifier cron-schedule
 ```
 
 ## Building the Application
@@ -94,50 +106,62 @@ This project is licensed under the MIT License.
 
 ## Обзор
 
-Монитор сети — это простой, но мощный инструмент, который проверяет доступность указанных хостов и отслеживает подключение к интернету. Он использует ping и DNS-запросы для определения статуса сети и может выполнять пользовательские команды в зависимости от статуса подключения. Уведомления могут быть отправлены для оповещения пользователей о любых изменениях в статусе сети.
+Монитор сети — это простой, но мощный инструмент, который проверяет доступность указанных хостов и отслеживает подключение к интернету. Он использует ping и DNS-запросы для определения статуса сети и может выполнять пользовательские команды в зависимости от состояния подключения. Уведомления могут быть отправлены, чтобы оповестить пользователей о любых изменениях в статусе сети.
 
-## Возможности
+## Особенности
 
 - Проверка нескольких хостов на доступность с помощью ping и DNS-запросов.
 - Настраиваемый график с использованием cron-выражений.
-- Выполнение команд при определенных событиях сети (включение, отключение, проблемы с DNS).
+- Выполнение команд при определенных сетевых событиях (включение, отключение, проблемы с DNS).
 - Уведомления об изменениях статуса сети.
-- Тихий режим для подавления вывода в консоль.
+- Режим тихой работы для подавления вывода в консоль.
 
 ## Установка
 
-Чтобы использовать Монитор сети, вам необходимо установить Node.js и Bun. Вы можете установить необходимые зависимости с помощью npm:
+- Linux
+  1) Скачайте `network_monitor.deb` из релиза.
+  2) Выполните `sudo apt install ./network_monitor.deb`.
+  3) Запустите `sudo systemctl start network_monitor.service`.
+  4) Выполните `sudo systemctl enable network_monitor.service`.
+- Windows
+  1) Скачайте `network_monitor_installer.exe` из релиза.
+  2) Установите.
+- macOS
+  - ¯\_(ツ)_/¯
+
+## Разработка
+Чтобы использовать Монитор сети, вам необходимо установить Bun. Вы можете установить необходимые зависимости с помощью bun:
 
 ```bash
-npm install node-cron ping dns node-notifier cron-schedule
+bun install node-cron ping dns node-notifier cron-schedule
 ```
 
 ## Сборка приложения
 
-Вы можете собрать приложение Монитор сети для различных платформ, используя предоставленный скрипт сборки. Скрипт компилирует приложение для Windows, Linux и macOS, а также создает пакет `.deb` для дистрибутивов на базе Debian.
+Вы можете собрать приложение Монитор сети для различных платформ, используя предоставленный скрипт сборки. Скрипт компилирует приложение для Windows, Linux и macOS и создает пакет `.deb` для дистрибутивов на базе Debian.
 
 ### Шаги сборки
 
-1. **Клонируйте репозиторий** и перейдите в директорию проекта.
+1. **Клонируйте репозиторий** и перейдите в каталог проекта.
 2. **Запустите скрипт сборки** с помощью Bun:
 
 ```bash
 bun run build.js
 ```
 
-### Выходные данные
+### Вывод
 
-- Скомпилированные бинарные файлы будут находиться в директории `dist`:
-    - Windows: `dist/win/network_monitor`
-    - Linux: `dist/linux/network_monitor`
-    - macOS (ARM): `dist/mac/network_monitor_arm`
-    - macOS (x86): `dist/mac/network_monitor_x86`
+- Скомпилированные бинарные файлы будут находиться в каталоге `dist`:
+  - Windows: `dist/win/network_monitor`
+  - Linux: `dist/linux/network_monitor`
+  - macOS (ARM): `dist/mac/network_monitor_arm`
+  - macOS (x86): `dist/mac/network_monitor_x86`
 
-- Пакет `.deb` для систем на базе Debian будет создан по адресу `dist/linux/network_monitor.deb`.
+- Пакет `.deb` для систем на базе Debian будет создан в `dist/linux/network_monitor.deb`.
 
-### Установка .deb пакета
+### Установка пакета .deb
 
-Чтобы установить `.deb` пакет, используйте следующую команду:
+Чтобы установить пакет `.deb`, используйте следующую команду:
 
 ```bash
 sudo dpkg -i dist/linux/network_monitor.deb
@@ -147,7 +171,7 @@ sudo dpkg -i dist/linux/network_monitor.deb
 
 ### Установщик для Windows
 
-Установщик для Windows также будет создан с помощью NSIS. Вы можете найти установщик в директории `dist` после выполнения скрипта сборки.
+Установщик для Windows также будет создан с использованием NSIS. Вы можете найти установщик в каталоге `dist` после выполнения скрипта сборки.
 
 ## Использование
 
@@ -159,8 +183,8 @@ node NetworkMonitor.js [options]
 
 ### Параметры
 
-- `--hosts, -h <host1,host2,...>`: Список хостов через запятую для проверки (по умолчанию: `8.8.8.8,1.1.1.1,example.com`).
-- `--schedule, -s <cron_schedule>`: Расписание для проверок (по умолчанию: `*/5 * * * *`).
+- `--hosts, -h <host1,host2,...>`: Список хостов для проверки, разделенный запятыми (по умолчанию: `8.8.8.8,1.1.1.1,example.com`).
+- `--schedule, -s <cron_schedule>`: Расписание cron для проверок (по умолчанию: `*/5 * * * *`).
 - `--quiet, -q`: Запуск в тихом режиме (без вывода в консоль).
 - `--disable-notifications`: Отключить уведомления.
 - `--on-up <command>`: Команда для выполнения, когда статус "включен".
@@ -179,3 +203,5 @@ node NetworkMonitor.js --hosts 8.8.8.8,1.1.1.1 --schedule '* * * * *' --on-up 'e
 ## Лицензия
 
 Этот проект лицензирован под лицензией MIT.
+
+---

@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'src/**' # Укажите путь к вашим исходным файлам
+      - 'package.json' # Убедитесь, что изменения в package.json также учитываются
+      - 'tsconfig.json' # Убедитесь, что изменения в package.json также учитываются
 
 permissions:
   contents: write
@@ -67,28 +71,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }} # Используем ваш персональный токен
 
-      - name: Upload Linux .deb package to Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ env.VERSION }}
-          files: dist/linux/network_monitor.deb
-        env:
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
-
-      - name: Upload Windows installer to Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ env.VERSION }}
-          files: dist/win/network_monitor.exe
-        env:
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
-
       - name: Upload macOS binaries to Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.VERSION }}
           files: |
-            dist/mac/network_monitor_arm
-            dist/mac/network_monitor_x86
+            dist/win/network_monitor_installer.exe
+            
+            dist/linux/network_monitor_x86.deb
+            dist/linux/network_monitor_arm64.deb
+            
+            dist/mac/network_monitor_darwin_arm64
+            dist/mac/network_monitor_darwin_x86
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
