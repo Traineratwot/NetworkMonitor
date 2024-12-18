@@ -13,11 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16' # Укажите нужную версию Node.js
-
       - name: Install Bun
         run: |
           curl -fsSL https://bun.sh/install | bash
@@ -30,19 +25,19 @@ jobs:
         run: bun run rubild
 
       - name: Upload Linux .deb package
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: network_monitor.deb
           path: dist/linux/network_monitor.deb
 
       - name: Upload Windows installer
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: network_monitor_installer.exe
           path: dist/win/network_monitor.exe # Убедитесь, что путь правильный
 
       - name: Upload macOS binaries
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: network_monitor_mac
           path: |
